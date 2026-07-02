@@ -148,17 +148,40 @@ const CAMPOS=[
 function showColMapper(){
   document.getElementById('upload-zone').style.display='none';
   const grid=document.getElementById('mapper-grid');
+
+  // Intentar mapeo automático completo — si el CSV es de Tally UPDS, usar índices fijos
+  const tallySignature = rawHeaders.some(h=>/realizas actividad física/i.test(h))
+                      && rawHeaders.some(h=>/cuántas horas duermes/i.test(h));
+
   grid.innerHTML=CAMPOS.map(c=>{
-    const auto=autoDetect(c.key,rawHeaders);
+    let auto=autoDetect(c.key,rawHeaders);
+
+    // Fallback: si autoDetect falla (-1), buscar por posición conocida de Tally UPDS
+    if(auto===-1 && tallySignature){
+      const tallyMap={
+        edad:3, genero:4, carrera:5, semestre:6, horario:7,
+        levanta_clases:8, duerme_clases:9, duerme_finde:14, levanta_finde:15,
+        horas:16, bien:17, desvela:18, somnolencia:19, cafe:20,
+        pantalla:21, actividad:22,
+      };
+      if(tallyMap[c.key]!==undefined && tallyMap[c.key]<rawHeaders.length){
+        auto=tallyMap[c.key];
+      }
+    }
+
     const opts=`<option value="-1">— no usar —</option>`+
-      rawHeaders.map((h,i)=>`<option value="${i}" ${i===auto?'selected':''}>${h}</option>`).join('');
+      rawHeaders.map((h,i)=>`<option value="${i}" ${i===auto?'selected':''}>${h.substring(0,55)}${h.length>55?'…':''}</option>`).join('');
     return`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:10px">
       <div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:2px">${c.label}</div>
-      <div style="font-size:10px;color:var(--muted);margin-bottom:6px">${c.hint}</div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:5px">${c.hint}</div>
       <select id="map-${c.key}" style="width:100%;font-size:11px">${opts}</select>
     </div>`;
   }).join('');
   document.getElementById('col-mapper').style.display='block';
+
+  // Mostrar banner si es el CSV de Tally UPDS
+  const banner=document.getElementById('tally-detected-banner');
+  if(banner) banner.style.display=tallySignature?'block':'none';
 }
 
 function autoDetect(key,headers){
@@ -259,9 +282,16 @@ function normHoraDuerm(v){
   return v.trim().substring(0,20);
 }
 function normSiNo(v){
-  if(/^s[ií]/i.test(v)||v==='1') return 'Sí';
-  if(/^no/i.test(v)||v==='0')    return 'No';
-  return v||'No';
+  if(!v) return 'No';
+  const s=String(v).trim();
+  // Handle any encoding of Sí — byte \xed = í in latin1, \xc3\xad = í in utf8
+  if(/^s/i.test(s)&&s.length<=3) return 'Sí';   // "Si","Sí","SI","sí","si"
+  if(/^s[ií]/i.test(s)||s==='1'||s.toLowerCase()==='yes') return 'Sí';
+  if(/^no$/i.test(s)||s==='0'||s.toLowerCase()==='no') return 'No';
+  // Fallback: if starts with s return Sí, n return No
+  if(s[0].toLowerCase()==='s') return 'Sí';
+  if(s[0].toLowerCase()==='n') return 'No';
+  return s||'No';
 }
 
 function normalize(val,key){
@@ -284,6 +314,30 @@ function normalize(val,key){
     case 'duerme_finde':   return normHoraDuerm(v);
     default:               return v;
   }
+}
+
+// Aplica el mapeo directo sin depender de los selects del UI
+function applyMappingAuto(){
+  // Mapeo fijo para el CSV de Tally UPDS (índices exactos del archivo)
+  const TALLY_MAP={
+    edad:3, genero:4, carrera:5, semestre:6, horario:7,
+    levanta_clases:8, duerme_clases:9, duerme_finde:14, levanta_finde:15,
+    horas:16, bien:17, desvela:18, somnolencia:19, cafe:20,
+    pantalla:21, actividad:22,
+  };
+  // Verificar que los índices coincidan con los headers reales
+  const ok = rawHeaders[16]&&/horas duermes/i.test(rawHeaders[16])
+           && rawHeaders[22]&&/actividad física/i.test(rawHeaders[22]);
+  if(!ok){
+    notify('No coincide con el formato Tally UPDS — usa el mapeo manual');
+    return;
+  }
+  // Sobreescribir los selects con los valores correctos
+  Object.entries(TALLY_MAP).forEach(([key,idx])=>{
+    const sel=document.getElementById('map-'+key);
+    if(sel) sel.value=String(idx);
+  });
+  applyMapping();
 }
 
 function applyMapping(){

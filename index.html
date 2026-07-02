@@ -205,14 +205,25 @@
 
     <!-- MAPEO DE COLUMNAS -->
     <div id="col-mapper" style="display:none;margin-bottom:14px">
-      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">
-        Mapear columnas del Excel → campos del análisis
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <span style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">
+          Mapear columnas del Excel → campos del análisis
+        </span>
+        <div id="tally-detected-banner" style="display:none;font-size:11px;color:var(--green);padding:4px 10px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:4px">
+          ✓ Encuesta de Tally UPDS detectada — mapeo automático listo
+        </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px" id="mapper-grid"></div>
-      <button class="btn btn-primary" style="margin-top:12px" onclick="applyMapping()">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-        Aplicar y analizar datos
-      </button>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="applyMapping()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Aplicar y analizar datos
+        </button>
+        <button class="btn btn-outline" onclick="applyMappingAuto()" title="Aplicar el mapeo automático sin revisar">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Aplicar directo
+        </button>
+      </div>
     </div>
 
     <!-- TABLA PREVIEW (solo lectura) -->
