@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estadística — Hábitos de Sueño UPDS</title>
+
+  <!-- Fuentes -->
+  <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Librerías externas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <!-- Estilos propios -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="notif" id="notif">Datos actualizados</div>
+
+<div class="hdr">
+  <div class="hdr-logo">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+  </div>
+  <div>
+    <div class="hdr-title">Estadística · Hábitos de Sueño — UPDS</div>
+    <div class="hdr-sub">Herramienta interactiva con pizarra animada</div>
+  </div>
+  <div class="hdr-pills">
+    <div class="pill"><b id="hdr-n">0</b> encuestados</div>
+    <div class="pill">IC 95%</div>
+    <div class="pill">Prueba Z</div>
+    <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Cambiar fondo">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    </button>
+  </div>
+</div>
+
+<nav>
+  <button class="active" onclick="showTab('inicio',this)">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>Inicio</button>
+  <button onclick="showTab('datos',this)">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Datos</button>
+  <button onclick="showTab('descriptivo',this)">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>Estadísticas</button>
+  <button onclick="showTab('probabilidad',this)">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>Probabilidades</button>
+  <button onclick="showTab('intervalos',this)">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Intervalos</button>
+  <button onclick="showTab('hipotesis',this)">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3l-6 9h6l-2 9 12-12h-7z"/></svg>Hipótesis</button>
+  <button onclick="showTab('resumen',this)">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>Resumen</button>
+</nav>
+
+<!-- ═══════════ INICIO / BIENVENIDA ═══════════ -->
+<div class="section active" id="sec-inicio">
+<div class="hero-wrap" id="hero-bg">
+  <div class="hero-overlay">
+    <div class="hero-inner">
+      <div class="hero-badge">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 000 12 6 6 0 010 6 9 9 0 100-18z"/></svg>
+        Proyecto de estadística aplicada
+      </div>
+      <h1 class="hero-title">Hábitos de Sueño en<br>Estudiantes de la UPDS</h1>
+      <p class="hero-sub">Una mirada estadística a cómo dormimos, por qué nos desvelamos y qué tanto afecta el celular en la calidad de nuestro descanso.</p>
+      <div class="hero-actions">
+        <button class="hero-btn-primary" onclick="showTab('datos', document.querySelectorAll('nav button')[1])">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Empezar a explorar
+        </button>
+        <button class="hero-btn-ghost" id="bg-toggle-btn" onclick="cycleBackground()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          Cambiar fondo
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sec-wrap">
+  <!-- Tema del proyecto -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      ¿De qué trata este proyecto?
+    </div>
+    <p style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:12px">
+      Dormir bien es una de esas cosas que todos sabemos que importa, pero que casi nadie prioriza — sobre todo en la universidad. Entre tareas, exámenes, redes sociales y un horario que cambia cada semestre, las horas de sueño suelen ser lo primero que se sacrifica.
+    </p>
+    <p style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:12px">
+      Esta encuesta se aplicó a estudiantes de la <b>Universidad Privada Domingo Savio (UPDS)</b> para entender, con datos reales, cómo duermen, qué tanto se desvelan, si sienten que descansan lo suficiente, y qué tan presente está el celular justo antes de dormir.
+    </p>
+    <p style="font-size:13px;color:var(--text);line-height:1.7">
+      Esta herramienta toma esas respuestas y las convierte en estadística aplicada: tablas de frecuencia, probabilidades, intervalos de confianza y una prueba de hipótesis — todo explicado paso a paso, como en una pizarra, para que el análisis se entienda y no solo se vea.
+    </p>
+  </div>
+
+  <!-- Qué se investigó -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      Lo que queríamos descubrir
+    </div>
+    <div class="hero-question-grid">
+      <div class="hq-item">
+        <div class="hq-icon" style="background:rgba(96,165,250,.12);color:var(--blue)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <div><b>¿Cuántas horas duermen?</b><span>Comparado con lo recomendado para su edad</span></div>
+      </div>
+      <div class="hq-item">
+        <div class="hq-icon" style="background:rgba(167,139,250,.12);color:var(--purple)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </div>
+        <div><b>¿El celular interfiere?</b><span>Uso de pantallas justo antes de dormir</span></div>
+      </div>
+      <div class="hq-item">
+        <div class="hq-icon" style="background:rgba(74,222,128,.12);color:var(--green)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div><b>¿Sienten que descansan?</b><span>Percepción propia de la calidad de sueño</span></div>
+      </div>
+      <div class="hq-item">
+        <div class="hq-icon" style="background:rgba(251,191,36,.12);color:var(--yellow)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </div>
+        <div><b>¿Hay somnolencia en clase?</b><span>Consecuencias visibles del mal descanso</span></div>
+      </div>
+      <div class="hq-item">
+        <div class="hq-icon" style="background:rgba(248,113,113,.12);color:var(--red)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+        <div><b>¿Se desvelan seguido?</b><span>Frecuencia de trasnochar entre semana</span></div>
+      </div>
+      <div class="hq-item">
+        <div class="hq-icon" style="background:rgba(192,132,252,.12);color:#c084fc">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg>
+        </div>
+        <div><b>¿Toman café o energéticas?</b><span>Como compensación al sueño perdido</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cómo está organizada la herramienta -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Cómo recorrer esta herramienta
+    </div>
+    <div class="hero-steps">
+      <div class="hs-step"><span class="hs-num">1</span><div><b>Datos</b><span>Sube el Excel de tu encuesta de Tally y se carga todo automáticamente</span></div></div>
+      <div class="hs-step"><span class="hs-num">2</span><div><b>Estadísticas</b><span>Tablas de frecuencia estilo SPSS y gráficos por cada pregunta</span></div></div>
+      <div class="hs-step"><span class="hs-num">3</span><div><b>Probabilidades</b><span>Pizarra animada que resuelve cualquier fórmula con tus datos reales</span></div></div>
+      <div class="hs-step"><span class="hs-num">4</span><div><b>Intervalos</b><span>Intervalos de confianza al 95% con curva de campana normal</span></div></div>
+      <div class="hs-step"><span class="hs-num">5</span><div><b>Hipótesis</b><span>Prueba Z explicada paso a paso, en lenguaje claro</span></div></div>
+      <div class="hs-step"><span class="hs-num">6</span><div><b>Resumen</b><span>Todo junto, listo para copiar a tu informe</span></div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ DATOS ═══════════ -->
+<div class="section" id="sec-datos">
+<div class="sec-wrap">
+  <div class="sec-intro">Ingresa los datos de tu encuesta. Todo se recalcula automáticamente al cambiar cualquier valor.</div>
+  <div class="card">
+    <div class="card-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      ¿Cuántos encuestados necesito?
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:12px">
+      <div><label style="font-size:11px;color:var(--muted2);display:block;margin-bottom:3px">Población total (N)</label><input type="number" id="pop-N" value="3200" min="1" oninput="recalc()"></div>
+      <div><label style="font-size:11px;color:var(--muted2);display:block;margin-bottom:3px">Nivel de confianza</label>
+        <select id="conf-level" onchange="recalc()"><option value="1.96" selected>95%</option><option value="2.576">99%</option><option value="1.645">90%</option></select></div>
+      <div><label style="font-size:11px;color:var(--muted2);display:block;margin-bottom:3px">Margen de error (e)</label><input type="number" id="margin-e" value="0.05" step="0.01" min="0.01" max="0.2" oninput="recalc()"></div>
+      <div><label style="font-size:11px;color:var(--muted2);display:block;margin-bottom:3px">Proporción estimada (p)</label><input type="number" id="prop-p" value="0.5" step="0.05" min="0.05" max="0.95" oninput="recalc()"></div>
+    </div>
+    <div class="fbox" id="formula-muestra">Esperando datos...</div>
+    <div class="grid3" style="margin-top:10px">
+      <div class="metric"><div class="metric-label">n calculada</div><div class="metric-value" id="m-ncalc">—</div></div>
+      <div class="metric"><div class="metric-label">n ajustada</div><div class="metric-value" id="m-nadj">—</div></div>
+      <div class="metric"><div class="metric-label">Encuestados reales</div><div class="metric-value" id="m-nreal" style="color:var(--green)">0</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Respuestas de la encuesta
+    </div>
+
+    <!-- ZONA DE CARGA -->
+    <div id="upload-zone" onclick="document.getElementById('excel-input').click()"
+      style="border:2px dashed var(--border2);border-radius:8px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px;background:var(--surface2)">
+      <input type="file" id="excel-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelUpload(event)">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" style="margin-bottom:10px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <div style="font-size:13px;font-weight:600;color:var(--muted2);margin-bottom:4px">Subir Excel de Tally</div>
+      <div style="font-size:11px;color:var(--muted)">Haz clic o arrastra tu archivo .xlsx aquí</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:6px">Compatible con exportación directa de Tally.so</div>
+    </div>
+
+    <!-- ESTADO DE CARGA -->
+    <div id="upload-status" style="display:none;padding:10px 14px;border-radius:5px;margin-bottom:14px;font-size:12px"></div>
+
+    <!-- MAPEO DE COLUMNAS -->
+    <div id="col-mapper" style="display:none;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">
+        Mapear columnas del Excel → campos del análisis
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px" id="mapper-grid"></div>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="applyMapping()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Aplicar y analizar datos
+      </button>
+    </div>
+
+    <!-- TABLA PREVIEW (solo lectura) -->
+    <div id="preview-wrap" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:11px;color:var(--muted2)" id="row-count">0 respuestas</span>
+        <button class="btn btn-outline btn-sm" onclick="resetUpload()">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>
+          Quitar archivo
+        </button>
+      </div>
+      <div style="overflow-x:auto;max-height:320px;overflow-y:auto">
+        <table id="preview-table">
+          <thead><tr>
+            <th>#</th><th>Edad</th><th>Género</th><th>Semestre</th>
+            <th>Horas sueño</th><th>¿Duerme bien?</th><th>Pantallas</th><th>Siestas</th>
+          </tr></thead>
+          <tbody id="data-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div></div>
+
+<!-- ═══════════ ESTADÍSTICAS ═══════════ -->
+<div class="section" id="sec-descriptivo">
+<div class="sec-wrap">
+  <div class="sec-intro">Resumen numérico de tus datos: promedio, mediana, dispersión y gráficos. La pizarra muestra cómo se calcula cada fórmula paso a paso.</div>
+
+  <!-- PIZARRA DESCRIPTIVO -->
+  <div class="board-section">
+    <div class="board-header">
+      <div class="board-header-left">
+        <div class="board-tag">Pizarra · Estadísticas descriptivas</div>
+        <div class="board-formula-selector" id="bfs-desc">
+          <button class="bfs-btn active" onclick="selectBoardFormula('desc','media',this)">Media (x̄)</button>
+          <button class="bfs-btn" onclick="selectBoardFormula('desc','mediana',this)">Mediana</button>
+          <button class="bfs-btn" onclick="selectBoardFormula('desc','std',this)">Desv. Estándar</button>
+          <button class="bfs-btn" onclick="selectBoardFormula('desc','varianza',this)">Varianza</button>
+        </div>
+      </div>
+    </div>
+    <div class="board-body">
+      <div class="board-inputs" id="bi-desc">
+        <div class="bi-label">Datos de la encuesta</div>
+        <div class="bi-desc" id="bi-desc-desc">Promedio aritmético de las horas de sueño: suma todos los valores y divide entre la cantidad.</div>
+        <div id="bi-desc-fields"></div>
+        <div class="bi-examples" id="bi-desc-ex"></div>
+        <button class="bi-solve" onclick="solveBoardDesc()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Resolver en pizarra</button>
+        <button class="bi-clear" onclick="clearBoardById('board-desc')">Limpiar</button>
+      </div>
+      <div class="board-canvas" id="board-desc">
+        <div class="board-idle-state" id="idle-desc">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          <div class="board-idle-big">Elige una fórmula</div>
+          <div class="board-idle-small">← ingresa datos y presiona Resolver</div>
+        </div>
+      </div>
+    </div>
+    <div class="board-status">
+      <div class="sdot" id="sdot-desc"></div>
+      <span class="stxt" id="stxt-desc">Listo</span>
+      <span class="sstep" id="sstep-desc"></span>
+    </div>
+  </div>
+
+  <!-- ESTADÍSTICOS RESUMEN estilo SPSS -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+      Estadísticos descriptivos — resumen
+    </div>
+    <div style="overflow-x:auto">
+      <table class="spss-table" id="spss-summary">
+        <thead><tr>
+          <th>Variable</th><th>N válido</th><th>Mínimo</th><th>Máximo</th>
+          <th>Media (x̄)</th><th>Mediana</th><th>Moda</th>
+          <th>Desv. estándar (s)</th><th>Varianza (s²)</th><th>Asimetría</th>
+        </tr></thead>
+        <tbody id="spss-summary-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MÉTRICAS RÁPIDAS -->
+  <div class="metrics-row">
+    <div class="metric"><div class="metric-label">Promedio sueño (x̄)</div><div class="metric-value" id="d-mean">—</div><div class="metric-sub">horas/noche</div></div>
+    <div class="metric"><div class="metric-label">Mediana</div><div class="metric-value" id="d-median">—</div><div class="metric-sub">valor del centro</div></div>
+    <div class="metric"><div class="metric-label">Desv. estándar (s)</div><div class="metric-value" id="d-std">—</div><div class="metric-sub">qué tanto varía</div></div>
+    <div class="metric"><div class="metric-label">Varianza (s²)</div><div class="metric-value" id="d-var">—</div></div>
+  </div>
+
+  <!-- ── HORAS DE SUEÑO ── -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      Horas de sueño por noche — tabla de frecuencias
+    </div>
+    <div class="spss-var-label">Variable: <b>Horas de sueño</b> · Tipo: numérica continua · Escala de medición: razón</div>
+    <div style="overflow-x:auto">
+      <table class="spss-table">
+        <thead><tr>
+          <th>Valor</th><th>Frecuencia (fi)</th><th>% válido</th><th>% acumulado</th>
+          <th>Frec. relativa (fri)</th><th>fr × 100</th>
+        </tr></thead>
+        <tbody id="freq-horas-body"></tbody>
+      </table>
+    </div>
+    <div class="spss-note" id="spss-horas-note"></div>
+    <div class="grid2" style="margin-top:14px">
+      <div><div class="chart-label">Histograma</div><div class="chart-wrap" style="height:220px"><canvas id="chart-hist"></canvas></div></div>
+      <div><div class="chart-label">Ojiva acumulada</div><div class="chart-wrap" style="height:220px"><canvas id="chart-ojiva"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── DUERME BIEN ── -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      ¿Considera que duerme bien? — tabla de frecuencias
+    </div>
+    <div class="spss-var-label">Variable: <b>Calidad de sueño</b> · Tipo: categórica dicotómica · Escala: nominal</div>
+    <div style="overflow-x:auto">
+      <table class="spss-table">
+        <thead><tr>
+          <th>Categoría</th><th>Frecuencia (fi)</th><th>% válido</th><th>% acumulado</th>
+          <th>Frec. relativa (fri)</th><th>fr × 100</th>
+        </tr></thead>
+        <tbody id="freq-bien-body"></tbody>
+      </table>
+    </div>
+    <div class="spss-note" id="spss-bien-note"></div>
+    <div class="grid2" style="margin-top:14px">
+      <div><div class="chart-label">Gráfico de barras</div><div class="chart-wrap" style="height:220px"><canvas id="chart-bien"></canvas></div></div>
+      <div><div class="chart-label">Gráfico circular</div><div class="chart-wrap" style="height:220px"><canvas id="chart-bien-pie"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── USO DE PANTALLAS ── -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      Uso de pantallas antes de dormir — tabla de frecuencias
+    </div>
+    <div class="spss-var-label">Variable: <b>Uso de pantallas</b> · Tipo: categórica dicotómica · Escala: nominal</div>
+    <div style="overflow-x:auto">
+      <table class="spss-table">
+        <thead><tr>
+          <th>Categoría</th><th>Frecuencia (fi)</th><th>% válido</th><th>% acumulado</th>
+          <th>Frec. relativa (fri)</th><th>fr × 100</th>
+        </tr></thead>
+        <tbody id="freq-pantalla-body"></tbody>
+      </table>
+    </div>
+    <div class="spss-note" id="spss-pantalla-note"></div>
+    <div class="grid2" style="margin-top:14px">
+      <div><div class="chart-label">Gráfico de barras</div><div class="chart-wrap" style="height:220px"><canvas id="chart-pantalla-bar"></canvas></div></div>
+      <div><div class="chart-label">Gráfico circular</div><div class="chart-wrap" style="height:220px"><canvas id="chart-pantalla"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── SIESTAS ── -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Toma de siestas durante el día — tabla de frecuencias
+    </div>
+    <div class="spss-var-label">Variable: <b>Siestas</b> · Tipo: categórica dicotómica · Escala: nominal</div>
+    <div style="overflow-x:auto">
+      <table class="spss-table">
+        <thead><tr>
+          <th>Categoría</th><th>Frecuencia (fi)</th><th>% válido</th><th>% acumulado</th>
+          <th>Frec. relativa (fri)</th><th>fr × 100</th>
+        </tr></thead>
+        <tbody id="freq-siesta-body"></tbody>
+      </table>
+    </div>
+    <div class="spss-note" id="spss-siesta-note"></div>
+    <div class="grid2" style="margin-top:14px">
+      <div><div class="chart-label">Gráfico de barras</div><div class="chart-wrap" style="height:220px"><canvas id="chart-siesta-bar"></canvas></div></div>
+      <div><div class="chart-label">Gráfico circular</div><div class="chart-wrap" style="height:220px"><canvas id="chart-siesta-pie"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── GÉNERO ── -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      Género — tabla de frecuencias
+    </div>
+    <div class="spss-var-label">Variable: <b>Género</b> · Tipo: categórica · Escala: nominal</div>
+    <div style="overflow-x:auto">
+      <table class="spss-table">
+        <thead><tr>
+          <th>Categoría</th><th>Frecuencia (fi)</th><th>% válido</th><th>% acumulado</th>
+          <th>Frec. relativa (fri)</th><th>fr × 100</th>
+        </tr></thead>
+        <tbody id="freq-genero-body"></tbody>
+      </table>
+    </div>
+    <div class="grid2" style="margin-top:14px">
+      <div><div class="chart-label">Gráfico de barras</div><div class="chart-wrap" style="height:220px"><canvas id="chart-genero-bar"></canvas></div></div>
+      <div><div class="chart-label">Gráfico circular</div><div class="chart-wrap" style="height:220px"><canvas id="chart-genero-pie"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── SEMESTRE ── -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Semestre — tabla de frecuencias
+    </div>
+    <div class="spss-var-label">Variable: <b>Semestre</b> · Tipo: numérica discreta · Escala: ordinal</div>
+    <div style="overflow-x:auto">
+      <table class="spss-table">
+        <thead><tr>
+          <th>Semestre</th><th>Frecuencia (fi)</th><th>% válido</th><th>% acumulado</th>
+          <th>Frec. relativa (fri)</th><th>fr × 100</th>
+        </tr></thead>
+        <tbody id="freq-semestre-body"></tbody>
+      </table>
+    </div>
+    <div class="grid2" style="margin-top:14px">
+      <div><div class="chart-label">Gráfico de barras</div><div class="chart-wrap" style="height:220px"><canvas id="chart-semestre-bar"></canvas></div></div>
+      <div><div class="chart-label">Polígono de frecuencias</div><div class="chart-wrap" style="height:220px"><canvas id="chart-semestre-line"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── CARRERA ── -->
+  <div class="card">
+    <div class="card-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Carrera — tabla de frecuencias</div>
+    <div class="spss-var-label">Variable: <b>Carrera / Facultad</b> · Tipo: categórica · Escala: nominal</div>
+    <div style="overflow-x:auto"><table class="spss-table"><thead><tr><th>Categoría</th><th>fi</th><th>% válido</th><th>% acumulado</th><th>fri</th><th>fr×100</th></tr></thead><tbody id="freq-carrera-body"></tbody></table></div>
+    <div class="grid2" style="margin-top:14px">
+      <div><div class="chart-label">Barras</div><div class="chart-wrap" style="height:220px"><canvas id="chart-carrera-bar"></canvas></div></div>
+      <div><div class="chart-label">Circular</div><div class="chart-wrap" style="height:220px"><canvas id="chart-carrera-pie"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── HORARIO ── -->
+  <div class="card">
+    <div class="card-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Horario de clases — tabla de frecuencias</div>
+    <div class="spss-var-label">Variable: <b>Horario</b> · Tipo: categórica · Escala: ordinal</div>
+    <div style="overflow-x:auto"><table class="spss-table"><thead><tr><th>Categoría</th><th>fi</th><th>% válido</th><th>% acumulado</th><th>fri</th><th>fr×100</th></tr></thead><tbody id="freq-horario-body"></tbody></table></div>
+    <div class="grid2" style="margin-top:14px">
+      <div><div class="chart-label">Barras</div><div class="chart-wrap" style="height:220px"><canvas id="chart-horario-bar"></canvas></div></div>
+      <div><div class="chart-label">Circular</div><div class="chart-wrap" style="height:220px"><canvas id="chart-horario-pie"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── SE DESVELA ── -->
+  <div class="card">
+    <div class="card-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> ¿Con qué frecuencia se desvela? — tabla de frecuencias</div>
+    <div class="spss-var-label">Variable: <b>Desvelo nocturno</b> · Tipo: ordinal · Escala: ordinal</div>
+    <div style="overflow-x:auto"><table class="spss-table"><thead><tr><th>Categoría</th><th>fi</th><th>% válido</th><th>% acumulado</th><th>fri</th><th>fr×100</th></tr></thead><tbody id="freq-desvela-body"></tbody></table></div>
+    <div class="grid2" style="margin-top:14px">
+      <div><div class="chart-label">Barras</div><div class="chart-wrap" style="height:220px"><canvas id="chart-desvela-bar"></canvas></div></div>
+      <div><div class="chart-label">Circular</div><div class="chart-wrap" style="height:220px"><canvas id="chart-desvela-pie"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── SOMNOLENCIA ── -->
+  <div class="card">
+    <div class="card-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg> Somnolencia en clases — tabla de frecuencias</div>
+    <div class="spss-var-label">Variable: <b>Somnolencia</b> · Tipo: ordinal · Escala: ordinal</div>
+    <div style="overflow-x:auto"><table class="spss-table"><thead><tr><th>Categoría</th><th>fi</th><th>% válido</th><th>% acumulado</th><th>fri</th><th>fr×100</th></tr></thead><tbody id="freq-somnolencia-body"></tbody></table></div>
+    <div class="grid2" style="margin-top:14px">
+      <div><div class="chart-label">Barras</div><div class="chart-wrap" style="height:220px"><canvas id="chart-somnolencia-bar"></canvas></div></div>
+      <div><div class="chart-label">Circular</div><div class="chart-wrap" style="height:220px"><canvas id="chart-somnolencia-pie"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── CAFÉ ── -->
+  <div class="card">
+    <div class="card-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg> Café / bebidas energéticas — tabla de frecuencias</div>
+    <div class="spss-var-label">Variable: <b>Consumo de café</b> · Tipo: ordinal · Escala: ordinal</div>
+    <div style="overflow-x:auto"><table class="spss-table"><thead><tr><th>Categoría</th><th>fi</th><th>% válido</th><th>% acumulado</th><th>fri</th><th>fr×100</th></tr></thead><tbody id="freq-cafe-body"></tbody></table></div>
+    <div class="grid2" style="margin-top:14px">
+      <div><div class="chart-label">Barras</div><div class="chart-wrap" style="height:220px"><canvas id="chart-cafe-bar"></canvas></div></div>
+      <div><div class="chart-label">Circular</div><div class="chart-wrap" style="height:220px"><canvas id="chart-cafe-pie"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- ── ACTIVIDAD FÍSICA ── -->
+  <div class="card">
+    <div class="card-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Actividad física regular — tabla de frecuencias</div>
+    <div class="spss-var-label">Variable: <b>Actividad física</b> · Tipo: dicotómica · Escala: nominal</div>
+    <div style="overflow-x:auto"><table class="spss-table"><thead><tr><th>Categoría</th><th>fi</th><th>% válido</th><th>% acumulado</th><th>fri</th><th>fr×100</th></tr></thead><tbody id="freq-siesta-body"></tbody></table></div>
+    <div class="grid2" style="margin-top:14px">
+      <div><div class="chart-label">Barras</div><div class="chart-wrap" style="height:220px"><canvas id="chart-siesta-bar"></canvas></div></div>
+      <div><div class="chart-label">Circular</div><div class="chart-wrap" style="height:220px"><canvas id="chart-siesta-pie"></canvas></div></div>
+    </div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════ PROBABILIDADES ═══════════ -->
+<div class="section" id="sec-probabilidad">
+<div class="sec-wrap">
+  <div class="sec-intro">¿Qué tan probable es que un estudiante duerma bien? ¿Y si además usa pantallas? La pizarra resuelve cualquier fórmula de probabilidad con tus datos.</div>
+
+  <!-- PIZARRA PROBABILIDAD -->
+  <div class="board-section">
+    <div class="board-header">
+      <div class="board-header-left">
+        <div class="board-tag">Pizarra · Probabilidades</div>
+        <div class="board-formula-selector" id="bfs-prob">
+          <button class="bfs-btn active" onclick="selectProbFormula('laplace',this)">Laplace</button>
+          <button class="bfs-btn" onclick="selectProbFormula('complemento',this)">Complemento</button>
+          <button class="bfs-btn" onclick="selectProbFormula('union_excl',this)">Unión excl.</button>
+          <button class="bfs-btn" onclick="selectProbFormula('union_noexcl',this)">Unión no excl.</button>
+          <button class="bfs-btn" onclick="selectProbFormula('conjunta_indep',this)">Conjunta indep.</button>
+          <button class="bfs-btn" onclick="selectProbFormula('conjunta_dep',this)">Conjunta dep.</button>
+          <button class="bfs-btn" onclick="selectProbFormula('condicional',this)">Condicional</button>
+          <button class="bfs-btn" onclick="selectProbFormula('diferencia',this)">Diferencia</button>
+          <button class="bfs-btn" onclick="selectProbFormula('prob_total',this)">Prob. total</button>
+          <button class="bfs-btn" onclick="selectProbFormula('bayes',this)">Bayes</button>
+        </div>
+      </div>
+    </div>
+    <div class="board-body">
+      <div class="board-inputs">
+        <div class="bi-label">Ingresa los datos</div>
+        <div class="bi-desc" id="prob-board-desc">Probabilidad clásica: divide casos favorables entre total posible.</div>
+        <div id="prob-board-fields"></div>
+        <div class="bi-examples" id="prob-board-ex"></div>
+        <button class="bi-solve" onclick="solveProb()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Resolver en pizarra</button>
+        <button class="bi-clear" onclick="clearBoardById('board-prob')">Limpiar</button>
+      </div>
+      <div class="board-canvas" id="board-prob">
+        <div class="board-idle-state" id="idle-prob">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+          <div class="board-idle-big">Elige una fórmula</div>
+          <div class="board-idle-small">← selecciona arriba y presiona Resolver</div>
+        </div>
+      </div>
+    </div>
+    <div class="board-status">
+      <div class="sdot" id="sdot-prob"></div>
+      <span class="stxt" id="stxt-prob">Listo</span>
+      <span class="sstep" id="sstep-prob"></span>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card"><div class="card-title">Probabilidades simples</div><div id="prob-simple-list"></div></div>
+    <div class="card"><div class="card-title">Conjuntas y condicionales</div><div id="prob-conjunta-list"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Calculadora — elige dos variables</div>
+    <div class="grid2" style="margin-bottom:10px">
+      <div><label style="font-size:11px;color:var(--muted2);display:block;margin-bottom:3px">Variable A</label>
+        <select id="prob-varA" onchange="calcProbInteractive()">
+          <option value="bien_si">Horas suficientes = Sí</option>
+          <option value="bien_no">Horas suficientes = No</option>
+          <option value="pantalla_si">Usa pantallas = Sí</option>
+          <option value="pantalla_no">Usa pantallas = No</option>
+          <option value="actividad_si">Actividad física = Sí</option>
+          <option value="desvela_si">Se desvela (alguna vez)</option>
+          <option value="horas_bajo">Horas sueño ≤ 6</option>
+          <option value="horas_alto">Horas sueño ≥ 8</option>
+        </select></div>
+      <div><label style="font-size:11px;color:var(--muted2);display:block;margin-bottom:3px">Variable B</label>
+        <select id="prob-varB" onchange="calcProbInteractive()">
+          <option value="pantalla_si">Usa pantallas = Sí</option>
+          <option value="pantalla_no">Usa pantallas = No</option>
+          <option value="bien_si">Horas suficientes = Sí</option>
+          <option value="actividad_si">Actividad física = Sí</option>
+          <option value="desvela_si">Se desvela (alguna vez)</option>
+          <option value="horas_bajo">Horas ≤ 6</option>
+          <option value="horas_alto">Horas ≥ 8</option>
+        </select></div>
+    </div>
+    <div id="prob-result-box"></div>
+  </div>
+</div></div>
+
+<!-- ═══════════ INTERVALOS ═══════════ -->
+<div class="section" id="sec-intervalos">
+<div class="sec-wrap">
+  <div class="sec-intro">Un intervalo de confianza dice: "estoy 95% seguro de que el valor real de la población está en este rango". La pizarra muestra cómo se construye.</div>
+
+  <!-- PIZARRA INTERVALOS -->
+  <div class="board-section">
+    <div class="board-header">
+      <div class="board-header-left">
+        <div class="board-tag">Pizarra · Intervalos de confianza</div>
+        <div class="board-formula-selector" id="bfs-ic">
+          <button class="bfs-btn active" onclick="selectICFormula('ic_prop',this)">IC Proporción</button>
+          <button class="bfs-btn" onclick="selectICFormula('ic_media',this)">IC Media</button>
+        </div>
+      </div>
+    </div>
+    <div class="board-body">
+      <div class="board-inputs">
+        <div class="bi-label">Parámetros</div>
+        <div class="bi-desc" id="ic-board-desc">Intervalo de confianza para la proporción de estudiantes que duermen bien.</div>
+        <div id="ic-board-fields"></div>
+        <div class="bi-examples" id="ic-board-ex"></div>
+        <button class="bi-solve" onclick="solveIC()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Resolver en pizarra</button>
+        <button class="bi-clear" onclick="clearBoardById('board-ic')">Limpiar</button>
+      </div>
+      <div class="board-canvas" id="board-ic">
+        <div class="board-idle-state" id="idle-ic">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <div class="board-idle-big">Elige un intervalo</div>
+          <div class="board-idle-small">← selecciona arriba y presiona Resolver</div>
+        </div>
+      </div>
+    </div>
+    <div class="board-status">
+      <div class="sdot" id="sdot-ic"></div>
+      <span class="stxt" id="stxt-ic">Listo</span>
+      <span class="sstep" id="sstep-ic"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">IC 95% — Proporción que duerme bien</div>
+    <div id="ic-prop-steps"></div>
+    <!-- Campana normal IC proporción -->
+    <div style="margin:16px 0">
+      <canvas id="chart-ic-prop" height="140"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">IC 95% — Promedio de horas de sueño</div>
+    <div id="ic-media-steps"></div>
+    <!-- Campana normal IC media -->
+    <div style="margin:16px 0">
+      <canvas id="chart-ic-media" height="140"></canvas>
+    </div>
+  </div>
+
+  <!-- TABLA UNIFICADA DE FRECUENCIAS -->
+  <div class="card" style="border-top:2px solid var(--blue)">
+    <div class="card-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+      Tabla de frecuencias unificada — todas las variables
+    </div>
+    <p style="font-size:11px;color:var(--muted2);margin-bottom:14px">Resumen de todas las variables en una sola tabla. Incluye frecuencias absolutas, relativas y acumuladas.</p>
+    <div style="overflow-x:auto" id="unified-freq-wrap">
+      <table class="spss-table" id="unified-freq-table">
+        <thead>
+          <tr style="background:#0a0a0a">
+            <th colspan="2" style="text-align:left;color:var(--blue)">Variable / Categoría</th>
+            <th>fi</th><th>fri</th><th>fri×100</th><th>Fi acum.</th><th>% acum.</th>
+          </tr>
+        </thead>
+        <tbody id="unified-freq-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+
+  </div>
+</div></div>
+
+<!-- ═══════════ HIPÓTESIS ═══════════ -->
+<div class="section" id="sec-hipotesis">
+<div class="sec-wrap">
+  <div class="sec-intro">¿Es verdad que exactamente el 50% de los estudiantes duerme bien? La pizarra resuelve la prueba Z paso a paso para responder con datos.</div>
+
+  <!-- PIZARRA HIPÓTESIS -->
+  <div class="board-section">
+    <div class="board-header">
+      <div class="board-header-left">
+        <div class="board-tag">Pizarra · Prueba de hipótesis</div>
+        <div class="board-formula-selector">
+          <button class="bfs-btn active">Prueba Z para proporción</button>
+        </div>
+      </div>
+    </div>
+    <div class="board-body">
+      <div class="board-inputs">
+        <div class="bi-label">Parámetros de la prueba</div>
+        <div class="bi-desc">Prueba bilateral Z para proporción. Contrasta si p es significativamente diferente a p₀.</div>
+        <div class="bi-field"><label>p̂ — proporción observada (se toma de tus datos)</label>
+          <input type="number" id="hyp-ph" step="0.001" min="0" max="1" placeholder="ej: 0.60"></div>
+        <div class="bi-field"><label>n — número de encuestados</label>
+          <input type="number" id="hyp-n" min="2" placeholder="ej: 25"></div>
+        <div class="bi-field"><label>p₀ — valor bajo H₀</label>
+          <input type="number" id="hyp-p0" value="0.50" step="0.01" min="0" max="1"></div>
+        <div class="bi-field"><label>α — nivel de significancia</label>
+          <select id="hyp-alpha"><option value="1.96">α = 0.05 (95%)</option><option value="2.576">α = 0.01 (99%)</option><option value="1.645">α = 0.10 (90%)</option></select></div>
+        <div class="bi-examples">
+          <span class="bi-ex" onclick="loadHypFromData()">Cargar de mis datos</span>
+          <span class="bi-ex" onclick="document.getElementById('hyp-ph').value=0.64;document.getElementById('hyp-n').value=25">Ej: 64% duermen bien</span>
+        </div>
+        <button class="bi-solve" onclick="solveHyp()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Resolver en pizarra</button>
+        <button class="bi-clear" onclick="clearBoardById('board-hyp')">Limpiar</button>
+      </div>
+      <div class="board-canvas" id="board-hyp">
+        <div class="board-idle-state" id="idle-hyp">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3l-6 9h6l-2 9 12-12h-7z"/></svg>
+          <div class="board-idle-big">Prueba de hipótesis</div>
+          <div class="board-idle-small">← ingresa datos y presiona Resolver</div>
+        </div>
+      </div>
+    </div>
+    <div class="board-status">
+      <div class="sdot" id="sdot-hyp"></div>
+      <span class="stxt" id="stxt-hyp">Listo</span>
+      <span class="sstep" id="sstep-hyp"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Las dos hipótesis</div>
+    <div class="grid2">
+      <div class="hyp-box hyp-h0"><strong style="color:var(--blue)">H₀ (Hipótesis nula)</strong><br><span style="font-size:12px;color:var(--muted2)">La mitad exacta de los estudiantes duerme bien.<br><code style="color:var(--blue)">H₀: p = 0.50</code></span></div>
+      <div class="hyp-box hyp-h1"><strong style="color:var(--yellow)">H₁ (Hipótesis alternativa)</strong><br><span style="font-size:12px;color:var(--muted2)">La proporción es diferente al 50% (bilateral).<br><code style="color:var(--yellow)">H₁: p ≠ 0.50</code></span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Resolución paso a paso (desde tus datos)</div>
+    <div class="prog-track"><div class="prog-fill" id="prog-hyp" style="width:0%"></div></div>
+    <div id="hyp-steps"></div>
+    <button class="btn btn-primary" style="margin-top:10px" onclick="animateHypothesis()">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>Animar resolución</button>
+  </div>
+  <div class="card" id="hyp-conclusion-card" style="display:none">
+    <div class="card-title">Conclusión</div>
+    <div id="hyp-conclusion"></div>
+  </div>
+</div></div>
+
+<!-- ═══════════ RESUMEN ═══════════ -->
+<div class="section" id="sec-resumen">
+<div class="sec-wrap">
+  <div class="card" style="border-top:2px solid var(--accent)">
+    <div class="card-title" style="font-size:14px">Resumen completo del proyecto</div>
+    <p style="font-size:11px;color:var(--muted2);margin-bottom:14px">Todos los resultados en una sola vista.</p>
+    <div id="resumen-content"></div>
+  </div>
+</div></div>
+
+
+  <!-- Lógica de la aplicación -->
+  <script src="app.js"></script>
+</body>
+</html>
