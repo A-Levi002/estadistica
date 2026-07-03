@@ -318,6 +318,53 @@
     <div class="metric"><div class="metric-label">Varianza (s²)</div><div class="metric-value" id="d-var">—</div></div>
   </div>
 
+  <!-- ── TABLA MAESTRA: TODOS LOS DATOS ── -->
+  <div class="card" style="border-top: 2px solid var(--accent);">
+    <div class="card-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>
+      </svg>
+      📊 Tabla Maestra — Todos los datos de la encuesta
+    </div>
+    <p style="font-size: 11px; color: var(--muted2); margin-bottom: 14px;">
+      Vista completa de todas las respuestas. Útil para exportar o verificar datos.
+    </p>
+    <div style="overflow-x: auto; max-height: 500px; overflow-y: auto; border: 1px solid var(--border); border-radius: 5px;">
+      <table class="spss-table" id="master-table">
+        <thead style="position: sticky; top: 0; z-index: 10;">
+          <tr style="background: var(--surface);">
+            <th>#</th>
+            <th>Edad</th>
+            <th>Sexo</th>
+            <th>Carrera</th>
+            <th>Semestre</th>
+            <th>Horario</th>
+            <th>Horas Sueño</th>
+            <th>¿Suficiente?</th>
+            <th>Desvelo</th>
+            <th>Somnolencia</th>
+            <th>Café</th>
+            <th>Pantallas</th>
+            <th>Act. Física</th>
+          </tr>
+        </thead>
+        <tbody id="master-table-body"></tbody>
+      </table>
+    </div>
+    <div style="margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap;">
+      <span style="font-size: 11px; color: var(--muted);">Total de registros: <b id="master-count">0</b></span>
+      <button class="btn btn-outline btn-sm" onclick="exportMasterTable()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Exportar CSV
+      </button>
+    </div>
+  </div>
+
   <!-- ── HORAS DE SUEÑO ── -->
   <div class="card">
     <div class="card-title">
@@ -509,14 +556,15 @@
     </div>
   </div>
 
-  <!-- ── ACTIVIDAD FÍSICA ── -->
+  <!-- ── ACTIVIDAD FÍSICA (CORREGIDO) ── -->
   <div class="card">
     <div class="card-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Actividad física regular — tabla de frecuencias</div>
     <div class="spss-var-label">Variable: <b>Actividad física</b> · Tipo: dicotómica · Escala: nominal</div>
-    <div style="overflow-x:auto"><table class="spss-table"><thead><tr><th>Categoría</th><th>fi</th><th>% válido</th><th>% acumulado</th><th>fri</th><th>fr×100</th></tr></thead><tbody id="freq-siesta-body"></tbody></table></div>
+    <div style="overflow-x:auto"><table class="spss-table"><thead><tr><th>Categoría</th><th>fi</th><th>% válido</th><th>% acumulado</th><th>fri</th><th>fr×100</th></tr></thead><tbody id="freq-actividad-body"></tbody></table></div>
+    <div class="spss-note" id="spss-actividad-note"></div>
     <div class="grid2" style="margin-top:14px">
-      <div><div class="chart-label">Barras</div><div class="chart-wrap" style="height:220px"><canvas id="chart-siesta-bar"></canvas></div></div>
-      <div><div class="chart-label">Circular</div><div class="chart-wrap" style="height:220px"><canvas id="chart-siesta-pie"></canvas></div></div>
+      <div><div class="chart-label">Barras</div><div class="chart-wrap" style="height:220px"><canvas id="chart-actividad-bar"></canvas></div></div>
+      <div><div class="chart-label">Circular</div><div class="chart-wrap" style="height:220px"><canvas id="chart-actividad-pie"></canvas></div></div>
     </div>
   </div>
 
@@ -683,7 +731,6 @@
     </div>
   </div>
 
-
   </div>
 </div></div>
 
@@ -767,8 +814,19 @@
   </div>
 </div></div>
 
+<!-- ═══════════ MODAL DE VIDEOS ═══════════ -->
+<div id="video-modal" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px;">
+  <div style="position: relative; width: 100%; max-width: 800px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.8);">
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border);">
+      <span style="font-size: 14px; font-weight: 600; color: var(--accent);" id="video-modal-title">Video explicativo</span>
+      <button onclick="closeVideoModal()" style="background: transparent; border: none; color: var(--muted2); font-size: 24px; cursor: pointer; padding: 0 8px;">&times;</button>
+    </div>
+    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">
+      <iframe id="video-iframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  </div>
+</div>
 
-  <!-- Lógica de la aplicación -->
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
